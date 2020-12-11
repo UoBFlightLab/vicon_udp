@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>vicon_udp</name>
+    <version>0.0.1</version>
+    <description>Vicon bridge using Tracker UDP interface</description>
+
+    <author email="robert.clarke@bristol.ac.uk">Robert Clarke</author>
+	<maintainer email="robert.clarke@bristol.ac.uk">Robert Clarke</maintainer>
+
+    <license>TODO</license>
+
+	<depend>roscpp</depend>
+	<depend>geometry_msgs</depend>
+    <depend>tf2_msgs</depend>
+
+	<buildtool_depend>catkin</buildtool_depend>
+    <build_depend>eigen</build_depend>
+
+</package>
