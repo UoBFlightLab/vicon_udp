@@ -1,0 +1,5 @@
+<launch>
+
+    <node pkg="vicon_udp" exec="vicon2pose" />
+
+</launch>

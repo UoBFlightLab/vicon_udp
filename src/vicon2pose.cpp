@@ -8,9 +8,9 @@
 
 #include <Eigen/Dense>
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
-#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/msg/pose_stamped.hpp>
 
 #include "ViconTracker/UDPInterface.hpp"
 
@@ -21,18 +21,23 @@ static int DEFAULT_BUFSIZE = 1024;
 
 // Advertise poses for Vicon objects from UDP datastream
 
-geometry_msgs::Quaternion eulXYZ_to_q(double roll, double pitch, double yaw);
+geometry_msgs::msg::Quaternion eulXYZ_to_q(double roll, double pitch, double yaw);
 
+
+using PosePublisher = rclcpp::Publisher<geometry_msgs::msg::PoseStamped>;
 
 int main(int argc, char **argv) {
 	// Initialise the node
-	ros::init(argc, argv, "vicon2tf");
-	ros::NodeHandle nh("~");
+	rclcpp::init(argc, argv);
+	auto node = rclcpp::Node("vicon2pose");
 	
 	// Get parameters for UDP setup
-	int buffer_size  = nh.param("buffer_size",DEFAULT_BUFSIZE);
-	int bind_port    = nh.param("bind_port",DEFAULT_PORT);
-	std::string bind_address_str = nh.param("bind_address",std::string("0.0.0.0"));
+	int buffer_size;
+	node.get_parameter_or("buffer_size",buffer_size,DEFAULT_BUFSIZE);
+	int bind_port;
+	node.get_parameter_or("bind_port",bind_port,DEFAULT_PORT);
+	std::string bind_address_str;
+	node.get_parameter_or("bind_address",bind_address_str,std::string("0.0.0.0"));
 
 	// UDP Socket
 	struct sockaddr_in bind_address;        /* our address */
@@ -76,13 +81,12 @@ int main(int argc, char **argv) {
 		}
 
 	// Publisher setup
-	auto publishers = std::map<std::string,ros::Publisher>();
+	auto publishers = std::map<std::string,std::shared_ptr<PosePublisher>>();
 
 	// Listen for UDP Data
-	while (ros::ok()) {
+	while (rclcpp::ok()) {
 		int recvlen = recvfrom(fd, buf, buffer_size, 0, NULL, NULL);
 		if (!(recvlen == 256 || recvlen == 512 || recvlen == 1024)) {
-			ros::spinOnce();
 			continue;
 			}
 		
@@ -93,31 +97,30 @@ int main(int argc, char **argv) {
 			std::string objectName = std::string(object->ItemName);
 			if(publishers.find(objectName) == publishers.end()) {
 				// If we don't have a publisher for this object, create one
-				publishers[objectName] = nh.advertise<geometry_msgs::PoseStamped>("/vicon/" + objectName, 1);
+				publishers[objectName] = node.create_publisher<geometry_msgs::msg::PoseStamped>("/vicon/" + objectName, 1);
 				}
 
 			// Populate object information
-			geometry_msgs::PoseStamped object_pose;
+			geometry_msgs::msg::PoseStamped object_pose;
 			object_pose.header.frame_id = "vicon";
-			object_pose.header.stamp = ros::Time::now();
+			object_pose.header.stamp = node.get_clock()->now();
 			object_pose.pose.position.x = object->TransX/1000.0;
 			object_pose.pose.position.y = object->TransY/1000.0;
 			object_pose.pose.position.z = object->TransZ/1000.0;
 			object_pose.pose.orientation = eulXYZ_to_q(object->RotX,object->RotY,object->RotZ);
 
 			// Add to published TF
-			publishers[objectName].publish(object_pose);
+			publishers[objectName]->publish(object_pose);
 			}
 		
-		ros::spinOnce();
 		}
 	return 0;
 	}
 
-geometry_msgs::Quaternion eulXYZ_to_q(double roll, double pitch, double yaw) {
+geometry_msgs::msg::Quaternion eulXYZ_to_q(double roll, double pitch, double yaw) {
   // Using eigen, and vicon UDP specific rotation order: XYZ
 
-  geometry_msgs::Quaternion q;
+  geometry_msgs::msg::Quaternion q;
 
   Eigen::Quaterniond qe;
   qe = Eigen::AngleAxisd(roll, Vector3d::UnitX())

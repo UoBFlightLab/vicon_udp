@@ -1,19 +1,25 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
     <name>vicon_udp</name>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <description>Vicon bridge using Tracker UDP interface</description>
 
     <author email="robert.clarke@bristol.ac.uk">Robert Clarke</author>
 	<maintainer email="robert.clarke@bristol.ac.uk">Robert Clarke</maintainer>
 
-    <license>TODO</license>
+    <license>BSD</license>
 
-	<depend>roscpp</depend>
+    <depend>rclcpp</depend>
+
 	<depend>geometry_msgs</depend>
     <depend>tf2_msgs</depend>
 
-	<buildtool_depend>catkin</buildtool_depend>
+    <buildtool_depend>eigen3_cmake_module</buildtool_depend>
+    <buildtool_depend>ament_cmake</buildtool_depend>
+
     <build_depend>eigen</build_depend>
 
+    <export>
+        <build_type>ament_cmake</build_type>
+    </export>
 </package>
