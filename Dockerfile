@@ -15,8 +15,8 @@ RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
 RUN . /opt/ros/${ROS_DISTRO}/setup.sh \
     && colcon build
 
-# Use install space setup in ros_entrypoint
-RUN sed -i 's#source "/opt/ros/$ROS_DISTRO/setup.bash"#source "/ros_ws/install/setup.bash"#' /ros_entrypoint.sh
+# Setup the new entrypoint
+COPY entrypoint.sh /ros_entrypoint.sh
 
 # Default Vicon UDP port is 51001
 EXPOSE 51001/udp
