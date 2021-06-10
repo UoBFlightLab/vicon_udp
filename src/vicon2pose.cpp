@@ -30,6 +30,15 @@ int main(int argc, char **argv) {
 	// Initialise the node
 	rclcpp::init(argc, argv);
 	auto node = rclcpp::Node("vicon2pose");
+
+	node.declare_parameter<std::string>("target_object","");
+
+	std::string targetObject;
+	auto param_was_set = node.get_parameter("target_object",targetObject);
+	if(!param_was_set || targetObject == "") {
+		perror("Could not get target object\n");
+		return 1;
+	}
 	
 	// Get parameters for UDP setup
 	int buffer_size;
@@ -47,7 +56,7 @@ int main(int argc, char **argv) {
 	// create a UDP socket
 	if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 		perror("cannot create socket\n");
-		return 0;
+		return 1;
 		}
 	
 	// Enable software/hardware timestamping
@@ -70,6 +79,7 @@ int main(int argc, char **argv) {
 	// Convert string representation of IP address to struct
 	if( !inet_pton(AF_INET, bind_address_str.c_str(), &(bind_address.sin_addr)) ) {
 		perror("Error parsing bind_address parameter");
+		return 1;
 		}
 	bind_address.sin_family = AF_INET;
 	bind_address.sin_port = htons(bind_port);
@@ -77,7 +87,7 @@ int main(int argc, char **argv) {
 	// Bind the socket to any valid IP address and a specific port
 	if (bind(fd, (struct sockaddr *)&bind_address, sizeof(bind_address)) < 0) {
 		perror("bind failed");
-		return 0;
+		return 1;
 		}
 
 	// Publisher setup
@@ -109,8 +119,10 @@ int main(int argc, char **argv) {
 			object_pose.pose.position.z = object->TransZ/1000.0;
 			object_pose.pose.orientation = eulXYZ_to_q(object->RotX,object->RotY,object->RotZ);
 
-			// Add to published TF
-			publishers[objectName]->publish(object_pose);
+			if (objectName == targetObject) {
+				// Add to published TF
+				publishers[objectName]->publish(object_pose);
+				}
 			}
 		
 		}

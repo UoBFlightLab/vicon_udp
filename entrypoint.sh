@@ -8,6 +8,8 @@ if [ -f "/etc/starling/vehicle.config" ]; then
     HAS_VEHICLE_CONFIG=true
     # Source VEHICLE_MAVLINK_SYSID, VEHICLE_NAME, VEHICLE_FCU_URL and VEHICLE_FIRMWARE
     source /etc/starling/vehicle.config
+else
+    exit 1;
 fi
 
 if [ ! -v $VEHICLE_NAMESPACE ]; then
@@ -16,12 +18,14 @@ if [ ! -v $VEHICLE_NAMESPACE ]; then
     export VEHICLE_NAMESPACE=${VEHICLE_NAMESPACE//-/_}
     echo "VEHICLE_NAMESPACE setting to $VEHICLE_NAMESPACE"
 else
-    echo "VEHICLE_NAMESPACE not set, default to mavros_bridge.launch.xml default"
+    echo "VEHICLE_NAMESPACE not set, defaulting to vehicle_${VEHICLE_MAVLINK_SYSID}"
+    export VEHICLE_NAMESPACE=vehicle_${VEHICLE_MAVLINK_SYSID}
 fi
 
 if [ -v $VEHICLE_NAME ]; then
     # If no vehicle name
     echo "VEHICLE_NAME was not set"
+    exit 1;
 else
     echo "VEHICLE_NAME set to $VEHICLE_NAME"
     export VEHICLE_NAME=$VEHICLE_NAME
