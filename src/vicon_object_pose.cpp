@@ -31,6 +31,15 @@ int main(int argc, char **argv) {
 	rclcpp::init(argc, argv);
 	auto node = rclcpp::Node("vicon2pose");
 
+	node.declare_parameter<std::string>("target_object","");
+
+	std::string targetObject;
+	auto param_was_set = node.get_parameter("target_object",targetObject);
+	if(!param_was_set || targetObject == "") {
+		perror("Could not get target object\n");
+		return 1;
+	}
+	
 	// Get parameters for UDP setup
 	int buffer_size;
 	node.get_parameter_or("buffer_size",buffer_size,DEFAULT_BUFSIZE);
@@ -98,7 +107,7 @@ int main(int argc, char **argv) {
 			std::string objectName = std::string(object->ItemName);
 			if(publishers.find(objectName) == publishers.end()) {
 				// If we don't have a publisher for this object, create one
-				publishers[objectName] = node.create_publisher<geometry_msgs::msg::PoseStamped>("vicon/" + objectName, 1);
+				publishers[objectName] = node.create_publisher<geometry_msgs::msg::PoseStamped>("/vicon/" + objectName, 1);
 				}
 
 			// Populate object information
@@ -110,8 +119,10 @@ int main(int argc, char **argv) {
 			object_pose.pose.position.z = object->TransZ/1000.0;
 			object_pose.pose.orientation = eulXYZ_to_q(object->RotX,object->RotY,object->RotZ);
 
-
-			publishers[objectName]->publish(object_pose);
+			if (objectName == targetObject) {
+				// Add to published TF
+				publishers[objectName]->publish(object_pose);
+				}
 			}
 		
 		}
