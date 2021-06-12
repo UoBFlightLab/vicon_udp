@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
 
 			// Populate object information
 			geometry_msgs::TransformStamped object_tf;
-			object_tf.header.frame_id = "world";
+			object_tf.header.frame_id = "vicon";
 			object_tf.header.stamp = ros::Time::now();
 			object_tf.child_frame_id = objectName;
 			object_tf.transform.translation.x = object->TransX/1000.0;
