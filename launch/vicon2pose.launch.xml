@@ -1,0 +1,11 @@
+<launch>
+
+    <arg name="bind_address" default="0.0.0.0"/>
+    <arg name="bind_port" default="51001"/>
+
+    <node pkg="vicon_udp" exec="vicon2pose" >
+        <param name="bind_address" value="$(arg bind_address)"/>
+        <param name="bind_port" value="$(arg bind_port)"/>
+    </node>
+
+</launch>
