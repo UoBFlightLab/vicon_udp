@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 project(vicon_udp)
 
@@ -18,8 +18,20 @@ add_executable(vicon2pose
 	)
 ament_target_dependencies(vicon2pose rclcpp geometry_msgs Eigen3)
 
+add_executable(vicon_object_pose
+	src/vicon2pose.cpp
+	)
+ament_target_dependencies(vicon_object_pose rclcpp geometry_msgs Eigen3)
+
+add_executable(vicon2tf
+	src/vicon2tf.cpp
+	)
+ament_target_dependencies(vicon2tf rclcpp tf2_msgs Eigen3)
+
 install(TARGETS
 	vicon2pose
+	vicon2tf
+	vicon_object_pose
 	DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY
