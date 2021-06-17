@@ -22,8 +22,6 @@ the Vicon stream as the `child_frame_id`. It can be run using:
 
 `ros2 run vicon_udp vicon2tf`
 
-> TODO: Configurable base frame.
-
 > TODO: Invalid Vicon names
 
 
@@ -56,6 +54,8 @@ Parameter      | Default   | Description
 ---------------|-----------|---------------------
 `bind_address` | `0.0.0.0` | Address to listen on
 `bind_port`    | `51001`   | Port to listen on
+`buffer_size`  | `1024`    | Default receive buffer size
+`frame_name`   | `vicon`   | Default frame name for Poses or TFs
 
 
 ### Common launch file arguments
@@ -66,3 +66,4 @@ Argument       | Default   | Description
 ---------------|-----------|---------------------
 `bind_address` | `0.0.0.0` | Address to listen on
 `bind_port`    | `51001`   | Port to listen on
+`frame_name`   | `vicon`   | Default frame name for Poses or TFs
