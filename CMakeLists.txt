@@ -19,7 +19,7 @@ add_executable(vicon2pose
 ament_target_dependencies(vicon2pose rclcpp geometry_msgs Eigen3)
 
 add_executable(vicon_object_pose
-	src/vicon2pose.cpp
+	src/vicon_object_pose.cpp
 	)
 ament_target_dependencies(vicon_object_pose rclcpp geometry_msgs Eigen3)
 

@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
 	unsigned char buf[buffer_size];
 
 	// Publisher setup
-	auto publisher = node.create_publisher<geometry_msgs::msg::PoseStamped>("/vicon/" + targetObject, 1);
+	auto publisher = node.create_publisher<geometry_msgs::msg::PoseStamped>("~/pose", 1);
 
 	// Listen for UDP Data
 	while (rclcpp::ok()) {
