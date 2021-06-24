@@ -39,6 +39,11 @@ struct __attribute__((packed)) UDPStreamPacket_raw {
 
 class UDPStreamPacket {
 	public:
+		UDPStreamPacket()
+		: objects()
+		{
+			}
+
 		UDPStreamPacket(unsigned char const* const buffer, int const buffer_size) {
 			auto packetObj = reinterpret_cast<UDPStreamPacket_raw const*>(buffer);
 			uint8_t numItems = packetObj->ItemsInBlock;

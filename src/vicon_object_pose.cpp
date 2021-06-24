@@ -1,17 +1,27 @@
-#include <vector>
 #include <string>
 
 #include <rclcpp/rclcpp.hpp>
 
+#include <geometry_msgs/msg/pose_stamped.hpp>
+
 #include "common.cpp"
 
-// Advertise poses for Vicon objects from UDP datastream
+// Advertise poses for a target Vicon object from UDP datastream
 
 int main(int argc, char **argv) {
 	// Initialise the node
 	rclcpp::init(argc, argv);
-	auto node = rclcpp::Node("vicon2pose");
+	auto node = rclcpp::Node("vicon_object_pose");
 
+	node.declare_parameter<std::string>("target_object","");
+
+	std::string targetObject;
+	auto param_was_set = node.get_parameter("target_object",targetObject);
+	if(!param_was_set || targetObject == "") {
+		perror("Could not get target object\n");
+		return 1;
+		}
+	
 	// Get common parameters
 	std::string frame_name;
 	get_common_parameters(node,frame_name);
@@ -27,13 +37,12 @@ int main(int argc, char **argv) {
 	if( fd == -1 ) {
 		return 1;	
 		}
-	
+
 	// Receive buffer
 	unsigned char buf[buffer_size];
 
 	// Publisher setup
-	using PosePublisher = rclcpp::Publisher<geometry_msgs::msg::PoseStamped>;
-	auto publishers = std::map<std::string,std::shared_ptr<PosePublisher>>();
+	auto publisher = node.create_publisher<geometry_msgs::msg::PoseStamped>("/vicon/" + targetObject, 1);
 
 	// Listen for UDP Data
 	while (rclcpp::ok()) {
@@ -41,18 +50,19 @@ int main(int argc, char **argv) {
 
 		for(auto object : packet.objects ) {
 			std::string objectName = std::string(object->ItemName);
-			if(publishers.find(objectName) == publishers.end()) {
-				// If we don't have a publisher for this object, create one
-				publishers[objectName] = node.create_publisher<geometry_msgs::msg::PoseStamped>("vicon/" + objectName, 1);
+			if( objectName != targetObject ) {
+				// Not our target object
+				continue;
 				}
 
 			auto object_pose = viconObjectToPoseStamped(object);
 			object_pose.header.frame_id = frame_name;
 			object_pose.header.stamp = node.get_clock()->now();
 
-			publishers[objectName]->publish(object_pose);
+			publisher->publish(object_pose);
 			}
 		
 		}
+
 	return 0;
 	}
